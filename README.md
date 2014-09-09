@@ -1,4 +1,6 @@
 datascience_coursera
 ====================
 
-Repositório para guardar os materiais da especialização em DataScience do Coursera
+Repository for keeping the files of the DataScience specialization of Coursera. 
+
+by Rogério Jerônimo Barbosa
