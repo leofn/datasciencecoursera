@@ -1,0 +1,665 @@
+---
+title: "R Programing"
+author: "Rogerio J Barbosa"
+output: html_document
+---
+
+### Apresentação
+
+#### R é um dialeto da linguagem S. Mas o que é S?
+- S é uma linguagem desenvolvida por John Chambers e outros no Bell Labs, em 1976
+- Foi escrito em Fortran 
+- Em 1988 foi re-escrito em C (versão 3).
+- Em 1998 foi lançada a versão 4, que basicamente é a que temos até hoje.
+
+R é uma implementação da linguagem S.
+
+---
+
+### Tipos de estrutura de dados
+
+#### Os tipos básicos de estruturas de dados no R são:
+- atomic classes
+- vectors
+- lists
+- factors
+- missing values
+- data.frames
+- names
+
+Tudo no R é  um objeto. O tipo mais básico e comum **vetor**. Um vetor é uma sequencia de objetos de uma mesma classe atômica. **Listas** são um tipo de vetor que pode conter elementos de classes diferentes.
+
+---
+
+#### As 5 classes "atomicas" são as seguintes:
+
+- character
+- numeric
+- integer
+- complex
+- logical 
+
+---
+
+#### Números no R
+
+Os números reais são registrados na classe **numeric** (double precision). Números inteiros são guardados como **integer**. 
+
+```{r}
+.6 # numeric
+9L # inteiro
+```
+
+O símbolo **Inf** indica "infinito". 
+  
+```{r}
+1/0   # = Inf
+1/Inf #= 0
+```
+
+O símbolo NaN significa "not a number" e é usado quando o resultado de um cálculo não produz resultados numéricos válidos
+
+```{r}
+0/0 #= NaN
+```
+
+---
+#### Atributos
+
+Objetos possuem atributos:
+
+- names
+- dimnames
+- dimensions (dim)
+- class
+- length
+- Entre outros... que podem ter sido produzidos pelos próprios usuários.
+
+Podemos acessar esses atributos através da funçao **attributes()**
+
+---
+
+#### Atribuições de valores a objetos (assignment)
+
+O operadore de atribuição é dados pelo símbolo **<-**
+
+```{r}
+x <- 1
+print(x) #explicity printing
+x #auto-printing
+```
+
+O simbolo **#** é o marcador de comentários.
+
+---
+
+#### Função c()
+
+Podemos atribuir diversos elementos a um vetor. Dizemos que estamos "combinando" valores. Para isso usamos a função **c()**
+
+```{r}
+x <- c(0.5,.06)
+x
+```
+
+Da mesma forma:
+
+```{r}
+x <- c(TRUE, FALSE)
+x <- c(T,F) 
+x <- c("a","b","c")
+x <- 2:29
+x <- c(1+0i,2+4i)
+```
+
+Uma forma alternativa é utilizar a função **vector**.
+
+```{r}
+x <- vector("numeric", length=10)
+x
+```
+
+---
+
+#### Combinando valores de diferentes classes
+##### Coerção implícita
+
+Quando combinamos valores de diferentes classes, automaticamente o R "coage" (ou "força") o vetor para que se conforme a uma classe que exerce dominância. De modo geral, a dominância segue a seguinte ordem:
+
+**character > numeric > integer > logic**
+
+```{r}
+y <- c(1.7,"a") #character
+y <- c(TRUE,"a") #character
+y <- c(2,TRUE) #numeric
+```
+
+---
+
+#### Combinando valores de diferentes classes
+##### Coerção explícita
+
+Podemos explicitamente alterar a classe de vetor com o uso de funções com o formato **as.** : 
+
+- as.numeric()
+- as.logical()
+- as.character()
+- etc...
+
+```{r}
+x <- 0:6 
+class(x)
+
+as.numeric(x)
+as.logical(x)
+as.character(x)
+```
+
+Mas esse tipo de coerçao nem sempre funciona:
+
+```{r}
+x <- c("a","b","c")
+
+as.numeric(x)
+as.logical(x)
+as.complex(x)
+``` 
+
+---
+
+#### Matrizes
+
+Do ponto de vista do R, matrizes são como vetores atômicos, que só podem guardar um tipo de classe. No entanto, possuem também o atributo de dimensionalidade, que permite organizar os dados em linhas e colunas.
+
+```{r}
+m <- matrix(nrow=2, ncol=3)
+m
+``` 
+
+Podemos acessar o número de dimensões de uma matriz com:
+```{r}
+dim(m)
+```
+
+Podemos saber quais são os atributos de um objeto com a função **attributes()**:
+```{r}
+attributes(m)
+```
+
+É importante saber que os dados numa matriz são distribuidos primeiramente nas colunas:
+
+```{r}
+m <- matrix(1:6, nrow=2, ncol=3)
+```
+
+Como matrizes, em linhas gerais, são um certo tipo de vetor unitário, é possivel construí-las imputanto o atributo **dim** num vetor comum:
+
+```{r} 
+m <- 1:10
+m
+
+dim(m) = c(2,5)
+m
+```
+
+Também podemos criar matrizes através dos comandos comandos **rbind** (row bind - combina vetores ou matrizes, empilhando-os como linhas numa matriz)  e **cbind** (column bind -- que agrega colunas às matrizes)
+
+```{r}
+x <- 1:3
+y <- 10:12
+
+cbind(x,y)
+rbind(x,y)
+```
+
+---
+
+#### Listas
+
+Como já dissemos, listas são um tipo especial de vetores. A principal característica das listas reside no fato de que podem conter mais de um tipo de classe de objetos. E justamente por isso são muito úteis.
+
+```{r}
+x <- list(1,"a",TRUE,1+4i)
+x
+```
+
+O "print" da lista é diferente. Cada elemento é indexado por colchetes 
+duplos.
+
+--- 
+
+#### Factors 
+
+Sao um tipo especial de vetores, usados para guardar informações de variáveis categóricas. Podem ser ordenados ou não ordenados.São tratados de forma diferente em modelos como lm() e glm(). A diferença entre fatores e vetores numéricos reside no fato de que os fatores contém "rótulos" (labels) associados aos seus valores:
+
+```{r}
+x <- factor(c("yes","yes","no","yes","no"))
+# A ordem dos "níveis" dos valores é conferida alfabeticamente
+x
+table(x)
+```
+
+Através do comando **unclass()**, podemos acessar os valores numéricos do fator, bem como conhecer seus atributos:
+```{r}
+unclass(x) 
+```
+
+A ordem dos valores pode ser atribuída de forma personalizada, usando o argumento "levels:
+```{r}
+x <- factor(c("yes","yes","no","yes","no"),
+	    levels=c("yes","no"))
+x # agora o valor yes vem primeiro
+```
+
+---
+
+#### Missing values
+
+No R, os valores ou casos "perdidos" são marcados com o símbolo **NA**. As funções **is.na()** e **is.nan()** retornam valores lógicos que indicam *missing values*. É importante notar que:
+
+- Os valores missing pertencem às classes atômicas dos vetores de que fazem parte. 
+- NaN é um caso de NA (isto é, NaN é um NA, mas o contrario não é verdadeiro)
+
+```{r}
+x <- c(1,2,NA,10,3)
+is.na(x)
+is.nan(x)
+
+x <- c(1,2,NA,NaN,4)
+is.na(x)
+is.nan(x)
+```
+
+---
+
+#### Data.frame
+
+Os data.frames talvez sejam a principal estrutura de dados do R para análises estatisticas. Guardam dados tabulares e ocupam no R a mesma posição ou função que os "bancos de dados" nos demais softwares de análise. 
+
+Do ponto de vista do R, **data.frames são um tipo especial de lista, em que todos os elementos têm o mesmo tamanho**. Ou seja, cada coluna do banco de dados é um vetor atômico (i.e., guarda informações de apenas um tipo de classe). Mas cada coluna pode pertencer a uma classe diferente. A exigência é que todas as colunas tenham sempre o mesmo número de linhas.
+
+```{r}
+x <- data.frame(foo=1:4,bar=c(T,T,F,F))
+x
+```
+
+Visualmente, se assemelham a matrizes. 
+
+Tem atributos especiais: 
+- row.names
+- dim
+- ncol
+- nrow
+- names
+
+Podem ser convertidos para matrizes com **data.matrix()** 
+
+--- 
+
+#### Names / nomes
+
+Todos os objetos no R tem "names". Isso é útil para criar códigos reprodutíveis e objetos auto-descritivos. 
+
+```{r}
+x <-1:3
+names(x)
+
+names(x) <- c("foo","bar","norf")
+x
+
+names(x)
+```
+
+
+##### Nomes em listas 
+
+```{r}
+x <- list(a=1,b=2,c=3)
+x
+```
+
+##### Nomes em Matrizes
+
+```{r}
+m <- matrix(1:4,nrow=2,ncol=2)
+dimnames(m) <- list(c("a","b"),c("c","d"))
+m
+```
+
+---
+
+#### Subsetting
+
+Podemos executar operações para extrair informações, trechos e subconjuntos de objetos do R. Em linhas gerais, há 3 tipos básicos de subsetting:
+
+- [ : colchete simples: retorna um objeto da mesma classe do objeto original. E pode ser usado para retornar mais de um elemento (há uma exceção)
+- [[ : colchete duplo : usado para extrair elementos de listas ou data.frames. O tipo de objeto retornado depende da natureza da informação
+- $ : mesmo uso do [[ (mas com algumas particularidades)
+
+Exemplos:
+```{r}
+x <- c("a","b","c","d","a")
+x[1]
+x[2]
+x[1:4]
+x[x > 4]
+u <- x > "a"
+u
+x[u]
+```
+
+---
+
+#### Subsetting de uma matriz
+
+x <- matrix(1:6,2,3)
+x[1,2]
+
+x[2,1]
+
+Mas não é sempre necessário especificar os dois índices
+
+x[1,]
+x[,2]
+
+
+x <- matrix(1:6,2,3)
+x[1,2] # retorna um vetor
+
+x[1,2,drop=FALSE] #preserva o atributo "dimension", não o "dropa"
+
+x <- matrix(1:6,2,3)
+x[1, ] # retorna um vetor
+x[1, ,drop=FALSE] #preserva o atributo "dimension", não o "dropa"
+
+--- 
+
+#### Subsetting de listas
+
+x <- list(foo = 1:4, bar = 0.6, baz = "hello")
+x[1]
+x$foo
+
+x[[1]]
+
+x$bar
+x[["bar"]]
+x["bar"]
+
+
+Para selecionar mais de um elemento de uma lista, devemos usar o colchete 
+simples:
+
+x[c(1,3)]
+
+x <- list(foo = 1:4, bar = 0.6, baz = "hello")
+name <- "foo"
+
+x[[name]]
+
+x$name # dá erro
+
+x$foo
+
+
+x <- list(a = list(10, 12, 14), b = c(3.14, 2.81))
+
+x[[c(1,3)]]
+x[[1]][[3]] # esses dois comandos são a mesma coisa
+
+---
+
+#### Partial matching
+
+x <- list(aardvark = 1:5)
+
+x$a # dá certo!! 
+
+x[["a"]] # não dá certo! 
+
+Essa é outra diferença entre $ e [[
+
+Mas podemos fazer:
+x[["a", exact = FALSE]] 
+
+
+--- 
+
+#### Removendo valores missing
+
+x <- c(1, 2, NA, 4, NA, 5)
+bad = is.na(x)
+x[!bad]
+
+Removendo valores missing (2)
+
+x <- c(1, 2, NA, 4, NA, 5)
+y <- c("a","b",NA,"d",NA,"f")
+good <- complete.cases(x,y)
+good
+
+x[good]
+y[good]
+
+airquality[1:6, ]
+
+good <- complete.cases(airquality)
+
+airquality[good,][1:6]
+
+---
+
+#### Lendo dados no R
+
+- read.table, read.csv, lê dados tabulares
+- readLines, lê linhas de um documento de texto
+- source, de um código escrito em R e o executa (o comando contrário é **dump**)
+- dget, também lê linhas de código de um arquivo de script em R (contrário de dput)
+- load, lê workspaces que foram salvos (contrario de save)
+- unserialize, lê objetos de R que estão em formato binário
+
+---
+
+#### Gravando dados a partir do R
+
+Os comandos análogos, para gravar/salvar dados são:
+- write.table, write.csv
+- wirteLines
+- dump
+- dput
+- save
+- serialize
+
+---
+
+#### Lendo dados com o read.table
+
+Os principais argumentos são:
+
+- file : nome e local do arquivo ou conexão
+- header : indica se o nome das variáveis está indicado na primeira linha
+- sep : tipo de separador de colunas
+- colClasses : um vetor do tipo "character" que informa a classe de cada coluna
+- nrows : informa quantas linhas devem ser lidas
+- comment.char : indica o caractere que deve ser entendido como marca de comentário
+- skip : indica o número de linhas que devem ser puladas antes o início dos dados, dentro do arquivo.
+- stringAsFactors : valor lógico que indica se os dados de tipo string/character devem ser transformados em factors
+
+---
+
+#### read.table 
+
+Para bancos de dados pequenos, não é necessario especificar muitos argumentos. R descobre automaticamente alguns dos parâmetros:
+
+- pula linhas que se iniciam com #, asumindo que se trata de um comentario
+- descobre quantas linhas há, no total
+- descobre o tipo de variável (classe) de cada coluna
+
+No entanto, especificar esses argumentos faz com que o R rode mais rápido.
+
+O comando **read.csv** executa a mesma coisa, ja especificando que a virgula é o separador de colunas.
+
+```{r}
+# data <- read.table("foo.txt")
+```
+
+---
+
+#### Lendo grandes bancos de dados 
+#####read.table
+
+Com bancos de dados maiores, é melhor tomar alguns cuidados para prevenir que o R trave...
+
+- Calcular o tamanho do banco de dados e quanto isso vai tomar da memória
+- Especificar a classe de cada coluna
+- Se não houver comentarios, especificar **comment.char = ""**. 
+
+Para especificar a classe de cada coluna (o que faz com que o R rode MUITO mais rápido), fazemos:
+
+```{r, eval=FALSE}
+initial <- read.table("datatable.txt", nrows=100)
+classes <- sapply(initial, class)
+tabAll <- read.table("datatable.txt",colClasses=classes)
+```
+
+---
+
+#### Lendo grandes bancos de dados 
+##### Conhecendo seu computador
+
+- Quanta memória está disponível?
+- Quais outros aplicativos estão sendo utilizados?
+- Há outros usuários logados no mesmo computador?
+- Qual é o sistema operacional?
+- O Sistema é 3b2 ou 64 bits?
+
+---
+
+#### Lendo grandes bancos de dados 
+##### Calculando a memória a ser utilizada
+
+Suponha que temos um banco com 1,5 milhões de casos e 120 colunas, todas numéricas:
+
+1.500.000 x 120 x 8 bytes/numeric
+= 1440000000
+= 1440000000 / 2^20 bytes/MB
+= 1373,29 MB
+= 1,34 GB
+
+Regra "de bolso": liberar o dobro disso...
+
+---
+
+#### Outros tipos de dados
+
+Para gravar:
+
+- dump e dput : gravam dados em formato de texto, mas com mais metadados. Assim, não gravam dados estruturados de maneira simples, como um write.table. A vantagem desses mecanismos é gravar formatos diversos de dados, com todas as especificações, num formato não compilado. E sendo dados textuais, podem se valer das vantagens do sistema Git.
+
+A filosofia do Linux é a de guardar todos os dados em texto.
+
+O lado negativo dessas formas de gravar dados advém do fato de que não são muito eficientes, com respeito ao tamanho. Mas podem ser comprimidos.
+
+--- 
+
+#### dput-ting 
+
+Vejamos como é a estrutura de dados guardada depois de um **dput**
+
+```{r}
+y <- data.frame(a=1,b="a")
+dput(y)
+```
+
+Podemos salvar isso num arquivo e acessar depois com:
+```{r, eval=FALSE}
+dput(y, file = "y.R")
+     
+new.y <- dget(y)
+new.y
+     
+```
+
+Ou seja, a funçao **dput** grava codigos em R, que serão necessarios para a posterior reconstrução dos objetos num ambiente. 
+
+--- 
+
+#### dump-ing 
+
+**dump** pode ser usado em varios objetos de uma só vez
+
+```{r}
+x <- "foo"
+y <- data.frame(a=1,b="a")
+dump(c("x","y"), file="data.R")
+
+rm(x,y)
+source("data.R")
+
+y
+x
+```
+
+---
+
+#### Interfaces do R com o "mundo exterior"
+
+É possivel estabelecer "conexões" entre o R e outros aplicativos.
+
+- file, abre uma conexão com um arquivo. 
+- gzfile, abre uma conexao com um arquivo compactado gzip
+- bzfile,abre uma conexao com um arquivo compactado bzip2
+- url, abre uma conexão com um site
+
+A maioria das funções faz isso, de forma implícita. Isso é o que a funçao read.table faz.
+
+---
+
+#### file
+
+```{r}
+str(file)
+```
+
+- description : nome do arquivo
+- open
+    - "r", read
+    - "w", writing
+    - "a", appending
+    - "rb", "wb", "ab", reading, writing e appending no modo binário (Windows)
+
+---
+
+#### Conexões
+
+O codigo abaixo:
+```{r}
+con <- file("foo.txt","r")
+data <-read.csv(con)
+close(con)
+```
+
+É o mesmo que:
+
+```{r}
+data <-read.csv("foo.txt")
+```
+
+Exemplo 2:
+```{r, eval=FALSE}
+con <- gzfile("words.gz")
+data <-readLines(con,10)
+close(con)
+```
+
+Exemplo 3:
+```{r, eval=FALSE}
+con <- url("http://www.jhsph.edu","r")
+x <-readLines(con)
+head(x)
+```
+
+---
+
+
+
